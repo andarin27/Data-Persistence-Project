@@ -28,4 +28,8 @@ public class Paddle : MonoBehaviour
 
         transform.position = pos;
     }
+    public void IncreaseSpeed()
+    {
+        Speed += 0.1f;
+    }
 }

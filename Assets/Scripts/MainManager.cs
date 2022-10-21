@@ -7,20 +7,36 @@ using UnityEngine.UI;
 public class MainManager : MonoBehaviour
 {
     public Brick BrickPrefab;
+    public Ball ballClass;
+    public Paddle paddleClass;
     public int LineCount = 6;
     public Rigidbody Ball;
+    public int highScore;
+    public string highScorePlayer;
 
     public Text ScoreText;
+    public Text HighScoreText;
     public GameObject GameOverText;
     
     private bool m_Started = false;
     private int m_Points;
+    private int nextLevel;
     
     private bool m_GameOver = false;
 
-    
+
     // Start is called before the first frame update
-    void Start()
+    private void Start()
+    {
+        GenerateBricks();
+        nextLevel = 1;
+        name = DataManager.instance.playerName;
+        highScore=DataManager.instance.highScore;
+        highScorePlayer=DataManager.instance.highScorePlayer;
+        HighScoreText.text = "Best Score: " + highScorePlayer + ": " + highScore;        
+    }
+
+    void GenerateBricks()
     {
         const float step = 0.6f;
         int perLine = Mathf.FloorToInt(4.0f / step);
@@ -60,17 +76,35 @@ public class MainManager : MonoBehaviour
                 SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
             }
         }
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            SceneManager.LoadScene(0);
+        }
     }
 
     void AddPoint(int point)
     {
         m_Points += point;
         ScoreText.text = $"Score : {m_Points}";
+        if (m_Points == 96 * nextLevel)
+        {
+            GenerateBricks();
+            nextLevel++;
+            Ball.transform.position = new Vector3(0f, 4.5f, 0);
+            ballClass.IncreaseMaxVelocity();
+            paddleClass.IncreaseSpeed();
+        }
     }
 
     public void GameOver()
     {
         m_GameOver = true;
         GameOverText.SetActive(true);
+        if (m_Points > highScore)
+        {
+            highScore = m_Points;
+            DataManager.instance.highScore = m_Points;
+            DataManager.instance.highScorePlayer=name;
+        }
     }
 }
